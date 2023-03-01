@@ -10182,6 +10182,46 @@
     ]
   },
   {
+    "name": "SaldoOperasionalBridging",
+    "url": "/SaldoOperasionalBridging",
+    "templateurl": "module/Akuntansi/Laporan/SaldoOperasionalBridging.html",
+    "controller": "SaldoOperasionalBridgingCtrl",
+    "deps": [
+      {
+        "module": "Services",
+        "define": "Service"
+      },
+      {
+        "module": "LoginServices",
+        "define": "LoginService"
+      },
+      {
+        "module": "AkuntansiService",
+        "define": "AkuntansiService"
+      }
+    ]
+  },
+  {
+    "name": "SaldoKasBridging",
+    "url": "/SaldoKasBridging",
+    "templateurl": "module/Akuntansi/Laporan/SaldoKasBridging.html",
+    "controller": "SaldoKasBridgingCtrl",
+    "deps": [
+      {
+        "module": "Services",
+        "define": "Service"
+      },
+      {
+        "module": "LoginServices",
+        "define": "LoginService"
+      },
+      {
+        "module": "AkuntansiService",
+        "define": "AkuntansiService"
+      }
+    ]
+  },
+  {
     "name": "BukuBesarPembantu",
     "url": "/BukuBesarPembantu",
     "templateurl": "module/Akuntansi/Jurnal/BukuBesarPembantu.html",

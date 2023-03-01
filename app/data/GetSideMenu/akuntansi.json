@@ -15,8 +15,16 @@
         "link": "#/PengeluaranBridging"
       },
       {
-        "name": "Pengelolaan Rekening",
+        "name": "Saldo Pengelolaan Rekening",
         "link": "#/PengelolaanRekeningBridging"
+      },
+      {
+        "name": "Saldo Operasional",
+        "link": "#/SaldoOperasionalBridging"
+      },
+      {
+        "name": "Saldo Kas",
+        "link": "#/SaldoKasBridging"
       }
     ]
   },

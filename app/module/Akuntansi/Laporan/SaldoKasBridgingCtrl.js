@@ -1,6 +1,6 @@
 define(['initialize'], function(initialize) {
 	'use strict';
-	initialize.controller('PenerimaanBridgingCtrl', ['$sce', '$q', '$rootScope', '$scope', '$http', 'ModelItemAkuntansi', 'ManageAkuntansi','DateHelper','CacheHelper',
+	initialize.controller('SaldoKasBridgingCtrl', ['$sce', '$q', '$rootScope', '$scope', '$http', 'ModelItemAkuntansi', 'ManageAkuntansi','DateHelper','CacheHelper',
 		function($sce, $q, $rootScope, $scope, $http, modelItemAkuntansi, manageAkuntansi,dateHelper,cacheHelper) {
 			$scope.dataVOloaded = true;
 			$scope.now = new Date();
@@ -13,50 +13,48 @@ define(['initialize'], function(initialize) {
 			$scope.item.cekDebet = false;
 			$scope.item.cekKredit = false;
 			$scope.isRouteLoading = false;
-
+			
 			// set function to get data
 			$scope.init = () => {
-					var tglAwal = moment($scope.tanggal).format('YYYY-MM-DD HH:mm:ss');
-					manageAkuntansi.getDataTableTransaksi(`akuntansi/get-penerimaan-bridge?tanggal_transaksi=${tglAwal}`)
-					.then((res)=>{
-						
+				var tgl = moment($scope.tanggal).format('YYYY-MM-DD HH:mm:ss');
+				manageAkuntansi.getDataTableTransaksi(`akuntansi/get-saldo-kas-bridge?tanggal_transaksi=${tgl}`)
+				.then(res => {
+
 					if(res.data.data.length === 0) {
-						$scope.dataLists = [{
-							"kd_akun": "",
-							"jumlah": parseInt("")
-						}]
-					} else {
-						for(let i of res.data.data){
-							i.jumlah = new Intl.NumberFormat('en-US').format(i.jumlah);
+						$scope.dataLists = {
+							"kd_bank": "",
+							"no_rekening": "",
+							"unit": "",
+							"saldo_akhir": parseInt("")
 						}
+					} else {
+						res.data.data[0].nilai_deposito = new Intl.NumberFormat('en-US').format(res.data.data[0].nilai_deposito);
 	
-						$scope.dataLists = res.data.data;
+						$scope.dataLists = res.data.data[0];
 					}
 				})
 			}
 
 			// call function to get the data
 			$scope.init();
-			
+
 			// search function to find the data
 			$scope.cariFilter = () => {
 				var tgl = moment($scope.tglParam).format('YYYY-MM-DD HH:mm:ss');
-				manageAkuntansi.getDataTableTransaksi(`akuntansi/get-penerimaan-bridge?tanggal_transaksi=${tgl}`).then((res) => {
-					console.log(res.data.data);
-					
+				manageAkuntansi.getDataTableTransaksi(`akuntansi/get-saldo-kas-bridge?tanggal_transaksi=${tgl}`).then((res) => {
 					// data table
 					$scope.dataGrid = new kendo.data.DataSource({
 						data: res.data.data,
 						sort:[
-							{
-								field: "nojurnal",
-								dir:"asc"
-							}
-						],
+                            {
+                                field: "nojurnal",
+                                dir:"asc"
+                            }
+                        ],
 						pageSize: 20,
-	
+
 					})
-					
+	
 					// data table field
 					$scope.columnGridExcel = {
 						// toolbar: ["excel"],
@@ -73,22 +71,28 @@ define(['initialize'], function(initialize) {
 						selectable: 'row',
 						columns:[
 							{
-								"field": "tanggal_transaksi",
-								"title": "Tanggal",
+								"field": "kd_bank",
+								"title": "Kode Bank",
 								"width" : "20px",
-								"template": "<span class='style-center'>#: tanggal_transaksi #</span>"
+								"template": "<span class='style-center'>#: kd_bank #</span>"
 							},
 							{
-								"field": "kd_akun",
-								"title": "Kode Akun",
+								"field": "no_bilyet",
+								"title": "No Bilyet",
 								"width" : "40px",
-								"template": "<span class='style-center'>#: kd_akun #</span>"
+								"template": "<span class='style-center'>#: no_bilyet #</span>"
 							},
 							{
-								"field": "jumlah",
-								"title": "Jumlah",
+								"field": "nilai_deposito",
+								"title": "Nilai Deposito",
+								"width" : "40px",
+								"template": "<span class='style-center'>{{formatRupiah('#: nilai_deposito #', '')}}</span>"
+							},
+							{
+								"field": "nilai_bunga",
+								"title": "Nilai Bunga",
 								"width" : "50px",
-								"template": "<span class='style-center'>{{formatRupiah('#: jumlah #', '')}}</span>"
+								"template": "<span class='style-center'>#: nilai_bunga #</span>"
 							},
 						]
 					}
@@ -101,36 +105,34 @@ define(['initialize'], function(initialize) {
 			// format number to currency
 			$scope.formatRupiah = function(value, currency) {
 			    return currency + " " + parseFloat(value).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
-			}	
-			
+			}
+
 			// add object to list of array
 			$scope.addDataLists = () => {
 				$scope.dataLists.push({
-					"kd_akun": "",
-					"jumlah": parseInt("")
+					"kd_bank": "",
+					"no_rekening": "",
+					"unit": "",
+					"saldo_akhir": parseInt("")
 				})
 			}
-			
-			// send data to database
-            $scope.sendData = () => {
-				var body = {
-					"data": $scope.dataLists,
-				};
 
-				for(let a of body.data){
-					a.jumlah = parseInt(a.jumlah.replace(/,/g, ''));					
-				}
-				
-				$scope.postListPenerimaan = () => {
-					manageAkuntansi.postpost(body, 'akuntansi/add-penerimaan-bridge')
+			// send data to database
+			$scope.sendData = () => {
+				let body = $scope.dataLists;
+
+				body.nilai_deposito = parseInt(body.nilai_deposito.replace(/,/g, ''));
+
+				$scope.postListSaldoKas = () => {
+					manageAkuntansi.postpost(body, 'akuntansi/add-saldo-kas-bridge')
 					.then(res => {
 						console.log(res);
 						$scope.init();
 					})
 				}                                        
-				
-				$scope.postListPenerimaan();
-				
+
+				$scope.postListSaldoKas();
+
 			}
 
 			// delete by index
@@ -216,8 +218,6 @@ define(['initialize'], function(initialize) {
 				input[0].setSelectionRange(caret_pos, caret_pos);
 			}
 
-			
-		}
-
+		}      
 	]);
 });
